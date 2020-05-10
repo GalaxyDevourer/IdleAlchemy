@@ -1,5 +1,6 @@
 package MainPack.GUI;
 
+import MainPack.CustomPlayer.CustomPlayer;
 import MainPack.Database.DAO.AltarDAO;
 import MainPack.Database.DAO.PlayerDAO;
 import MainPack.Database.DAO.StockDAO;
@@ -10,6 +11,8 @@ import MainPack.Entity.Player;
 import javafx.animation.KeyFrame;
 import javafx.animation.PathTransition;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,9 +21,11 @@ import javafx.scene.ImageCursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -98,6 +103,15 @@ public class PlayGround {
     @FXML ImageView attack_ball;
     @FXML ImageView health_bar;
 
+    @FXML AnchorPane soundON_press;
+    @FXML AnchorPane soundON_common;
+    @FXML AnchorPane soundOFF_press;
+    @FXML AnchorPane soundOFF_common;
+    @FXML Slider volume_changer;
+
+    private CustomPlayer my_player;
+    private String menu_music = System.getProperty("user.dir") + "\\src\\Materials\\Music\\battle_music.mp3";
+
     private Timeline speedTimer;
 
     private List<ImageView> bubbles_list;
@@ -114,9 +128,24 @@ public class PlayGround {
         stage.close();
     }
 
+    @FXML
+    private void initialize () {
+        my_player = new CustomPlayer(menu_music);
+        my_player.changeAuto(true);
+        my_player.setRecordSettings(Integer.MAX_VALUE);
+
+        soundON_common.setVisible(true);
+        soundON_press.setVisible(true);
+
+        soundOFF_common.setVisible(false);
+        soundOFF_press.setVisible(false);
+    }
+
     //##############################  БЛОК ЗАКРЫТИЯ ОКНА И ВОЗВРАЩЕНИЯ В МЕНЮ ВХОДА  ##################################
 
     void closeGame () throws IOException {
+        my_player.stopSound();
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Reg_gui.fxml"));
         Parent root = loader.load();
 
@@ -128,6 +157,53 @@ public class PlayGround {
 
         Image image = new Image("Materials\\Cursor\\CustomCursor.png");  //pass in the image path
         scene.setCursor(new ImageCursor(image));
+    }
+
+    //################################  БЛОК КОДА МУЗЫКАЛЬНОГО ВОСПРОИЗВЕДЕНИЯ  ########################################
+
+    private void changeStatusSound () {
+        if ( my_player.showStatus() == MediaPlayer.Status.PLAYING) {
+            my_player.pauseSound();
+        }
+        else if (my_player.showStatus() == MediaPlayer.Status.PAUSED) {
+            my_player.playSound();
+        }
+    }
+
+    @FXML
+    private void changeVolumeSound () {
+        volume_changer.valueProperty().addListener((observable, oldValue, newValue) -> my_player.volumeSound(newValue.doubleValue()));
+
+    }
+
+    @FXML
+    private void pressSound () {
+        if ( soundON_common.isVisible() && soundON_press.isVisible()) {
+            soundON_common.setVisible(false);
+        }
+        else if (soundOFF_common.isVisible() && soundOFF_press.isVisible()) {
+            soundOFF_common.setVisible(false);
+        }
+    }
+
+    @FXML
+    private void releaseSound () {
+        if ( !soundON_common.isVisible() && soundON_press.isVisible()) {
+            soundON_press.setVisible(false);
+            soundOFF_press.setVisible(true);
+            soundOFF_common.setVisible(true);
+
+            volume_changer.setVisible(false);
+        }
+        else if (!soundOFF_common.isVisible() && soundOFF_press.isVisible()) {
+            soundOFF_press.setVisible(false);
+            soundON_press.setVisible(true);
+            soundON_common.setVisible(true);
+
+            volume_changer.setVisible(true);
+        }
+
+        changeStatusSound();
     }
 
     //################################  БЛОК ИНИЦИАЛИЗАЦИИ ОБЪЕКТОВ ДАННЫМИ С БД  ####################################

@@ -1,5 +1,6 @@
 package MainPack.GUI;
 
+import MainPack.CustomPlayer.CustomPlayer;
 import MainPack.Database.DAO.AltarDAO;
 import MainPack.Database.DAO.PlayerDAO;
 import MainPack.Database.DAO.StockDAO;
@@ -9,15 +10,19 @@ import MainPack.Entity.Player;
 import MainPack.Entity.Stock;
 import MainPack.Entity.User;
 import MainPack.Main;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.ImageCursor;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -29,19 +34,41 @@ public class Registration {
 
     private User user;
 
-    public PasswordField password_field;
-    public TextField username_field;
+    @FXML PasswordField password_field;
+    @FXML TextField username_field;
 
-    public AnchorPane sign_in;
-    public AnchorPane sign_in_light;
-    public AnchorPane register;
+    @FXML AnchorPane sign_in;
+    @FXML AnchorPane sign_in_light;
+    @FXML AnchorPane register;
 
-    public AnchorPane register_light;
+    @FXML AnchorPane register_light;
 
-    public AnchorPane panel_sign_in;
-    public AnchorPane panel_register;
+    @FXML AnchorPane panel_sign_in;
+    @FXML AnchorPane panel_register;
 
-    public Text error_field;
+    @FXML Text error_field;
+
+    @FXML AnchorPane soundON_press;
+    @FXML AnchorPane soundON_common;
+    @FXML AnchorPane soundOFF_press;
+    @FXML AnchorPane soundOFF_common;
+    @FXML Slider volume_changer;
+
+    private CustomPlayer my_player;
+    private String menu_music = System.getProperty("user.dir") + "\\src\\Materials\\Music\\menu_music.mp3";
+
+    @FXML
+    private void initialize () {
+        my_player = new CustomPlayer(menu_music);
+        my_player.changeAuto(true);
+        my_player.setRecordSettings(Integer.MAX_VALUE);
+
+        soundON_common.setVisible(true);
+        soundON_press.setVisible(true);
+
+        soundOFF_common.setVisible(false);
+        soundOFF_press.setVisible(false);
+    }
 
     private void changeLight(AnchorPane on, AnchorPane off) {
         on.setVisible(true);
@@ -66,7 +93,55 @@ public class Registration {
         }
     }
 
+    //################################  БЛОК КОДА МУЗЫКАЛЬНОГО ВОСПРОИЗВЕДЕНИЯ  ########################################
+
+    private void changeStatusSound () {
+        if ( my_player.showStatus() == MediaPlayer.Status.PLAYING) {
+            my_player.pauseSound();
+        }
+        else if (my_player.showStatus() == MediaPlayer.Status.PAUSED) {
+            my_player.playSound();
+        }
+    }
+
+    @FXML
+    private void changeVolumeSound () {
+        volume_changer.valueProperty().addListener((observable, oldValue, newValue) -> my_player.volumeSound(newValue.doubleValue()));
+
+    }
+
     //#####################################  БЛОК КОДА С ЭФФЕКТАМИ ЭЛЕМЕНТОВ  ##########################################
+
+    @FXML
+    private void pressSound () {
+        if ( soundON_common.isVisible() && soundON_press.isVisible()) {
+            soundON_common.setVisible(false);
+        }
+        else if (soundOFF_common.isVisible() && soundOFF_press.isVisible()) {
+            soundOFF_common.setVisible(false);
+        }
+    }
+
+    @FXML
+    private void releaseSound () {
+        if ( !soundON_common.isVisible() && soundON_press.isVisible()) {
+            soundON_press.setVisible(false);
+            soundOFF_press.setVisible(true);
+            soundOFF_common.setVisible(true);
+
+            volume_changer.setVisible(false);
+        }
+        else if (!soundOFF_common.isVisible() && soundOFF_press.isVisible()) {
+            soundOFF_press.setVisible(false);
+            soundON_press.setVisible(true);
+            soundON_common.setVisible(true);
+
+            volume_changer.setVisible(true);
+        }
+
+        changeStatusSound();
+    }
+
     @FXML
     private void enterSignInLight() {
         changeLight(sign_in_light, sign_in);
@@ -129,6 +204,7 @@ public class Registration {
         Image image = new Image("Materials\\Cursor\\CustomCursor.png");
         scene.setCursor(new ImageCursor(image));
 
+        my_player.stopSound();
         Main.closeStage();
     }
 
