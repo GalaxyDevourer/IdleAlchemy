@@ -11,8 +11,6 @@ import MainPack.Entity.Player;
 import javafx.animation.KeyFrame;
 import javafx.animation.PathTransition;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -109,8 +107,20 @@ public class PlayGround {
     @FXML AnchorPane soundOFF_common;
     @FXML Slider volume_changer;
 
-    private CustomPlayer my_player;
-    private String menu_music = System.getProperty("user.dir") + "\\src\\Materials\\Music\\battle_music.mp3";
+    private CustomPlayer background_player; // for background sound
+    private CustomPlayer monster_player; // for monster death
+    private CustomPlayer weapon_player; // for weapon fire
+    private CustomPlayer upgrade_player; // for altar upgrade
+    private CustomPlayer buy_player; // for something buy in shop
+    private CustomPlayer alch_player;  // for alch click
+
+    final private String BACKGROUND_SOUND = System.getProperty("user.dir") + "\\src\\Materials\\Music\\battle_music.mp3";
+    private String MONSTER_DEATH = System.getProperty("user.dir") + "\\src\\Materials\\SoundEffects\\monster_death.wav";
+    private String WEAPON_FIRE = System.getProperty("user.dir") + "\\src\\Materials\\SoundEffects\\weapon_fire.wav";
+    private String UPGRADE_ALTAR = System.getProperty("user.dir") + "\\src\\Materials\\SoundEffects\\upgrade_altar.wav";
+    private String BUY_SOMETHING = System.getProperty("user.dir") + "\\src\\Materials\\SoundEffects\\but_something.wav";
+    private String ALCH_CLICK = System.getProperty("user.dir") + "\\src\\Materials\\SoundEffects\\alch_click.wav";
+
 
     private Timeline speedTimer;
 
@@ -130,9 +140,14 @@ public class PlayGround {
 
     @FXML
     private void initialize () {
-        my_player = new CustomPlayer(menu_music);
-        my_player.changeAuto(true);
-        my_player.setRecordSettings(Integer.MAX_VALUE);
+        background_player = new CustomPlayer(BACKGROUND_SOUND);
+        background_player.changeAuto(true);
+        background_player.setRecordSettings(Integer.MAX_VALUE);
+
+        weapon_player = new CustomPlayer(WEAPON_FIRE);
+        alch_player = new CustomPlayer(ALCH_CLICK);
+        monster_player = new CustomPlayer(MONSTER_DEATH);
+        upgrade_player = new CustomPlayer(UPGRADE_ALTAR);
 
         soundON_common.setVisible(true);
         soundON_press.setVisible(true);
@@ -144,7 +159,11 @@ public class PlayGround {
     //##############################  БЛОК ЗАКРЫТИЯ ОКНА И ВОЗВРАЩЕНИЯ В МЕНЮ ВХОДА  ##################################
 
     void closeGame () throws IOException {
-        my_player.stopSound();
+        background_player.disposeSound();
+        weapon_player.disposeSound();
+        alch_player.disposeSound();
+        monster_player.disposeSound();
+        upgrade_player.disposeSound();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Reg_gui.fxml"));
         Parent root = loader.load();
@@ -161,18 +180,35 @@ public class PlayGround {
 
     //################################  БЛОК КОДА МУЗЫКАЛЬНОГО ВОСПРОИЗВЕДЕНИЯ  ########################################
 
-    private void changeStatusSound () {
-        if ( my_player.showStatus() == MediaPlayer.Status.PLAYING) {
-            my_player.pauseSound();
+    private void playCustomSoundFX (CustomPlayer player) {
+        if (player.showStatus() == MediaPlayer.Status.PLAYING) {
+            player.stopSound();
+            player.playSound();
         }
-        else if (my_player.showStatus() == MediaPlayer.Status.PAUSED) {
-            my_player.playSound();
+        else if (player.showStatus() != MediaPlayer.Status.STOPPED) player.playSound();
+    }
+
+    private void changeStatusSound () {
+        if ( background_player.showStatus() == MediaPlayer.Status.PLAYING) {
+            background_player.pauseSound();
+            weapon_player.stopSound();
+            alch_player.stopSound();
+            monster_player.stopSound();
+            upgrade_player.stopSound();
+
+        }
+        else if (background_player.showStatus() == MediaPlayer.Status.PAUSED) {
+            background_player.playSound();
+            weapon_player.playSound();
+            alch_player.playSound();
+            monster_player.playSound();
+            upgrade_player.playSound();
         }
     }
 
     @FXML
     private void changeVolumeSound () {
-        volume_changer.valueProperty().addListener((observable, oldValue, newValue) -> my_player.volumeSound(newValue.doubleValue()));
+        volume_changer.valueProperty().addListener((observable, oldValue, newValue) -> background_player.volumeSound(newValue.doubleValue()));
 
     }
 
@@ -293,6 +329,7 @@ public class PlayGround {
                 new KeyFrame(
                         Duration.seconds(speed),
                         event -> {
+                            playCustomSoundFX(weapon_player);
                             transition.play();
                             attack_ball.setVisible(true);
                             // установить при окончании
@@ -300,6 +337,7 @@ public class PlayGround {
                                 attack_ball.setVisible(false);
 
                                 if ( monster.killMonster(player) ) {
+                                    playCustomSoundFX(monster_player);
                                     monster.dieMonster(player, playerStock);
                                     changeMonsterDataOnSpawn();
                                 }
@@ -394,6 +432,7 @@ public class PlayGround {
     @FXML
     private void clickOnCauldron() {
         alchemistAnimation();
+        playCustomSoundFX(alch_player);
 
         player.clickOnCauldron(playerStock);
         if ( player.getProgress() == 0) bubblesOff();
@@ -472,6 +511,7 @@ public class PlayGround {
 
     @FXML
     private void pressOn_1() { // 1 3 5
+        playCustomSoundFX(upgrade_player);
         int result = 0;
         if( upg_dec_common_light_1.isVisible()) result = playerAltar.buyCostReduceUpg(playerStock);
         String message = "             Level: " + playerAltar.getCostReduceLevel() +
@@ -483,6 +523,7 @@ public class PlayGround {
 
     @FXML
     private void pressOn_2() { // 2 4 7
+        playCustomSoundFX(upgrade_player);
         int result = 0;
         if( upg_dmg_common_light_2.isVisible()) result = playerAltar.buyWeaponDamageUpg(playerStock, player);
         String message = "             Level: " + playerAltar.getWeaponDamageLevel() +
@@ -494,6 +535,7 @@ public class PlayGround {
 
     @FXML
     private void pressOn_3() { // 1 5 8
+        playCustomSoundFX(upgrade_player);
         int result = 0;
         if( upg_spdm_common_light_3.isVisible()) {
             result = playerAltar.buyWeaponSpeedUpg(playerStock, player);
@@ -508,6 +550,7 @@ public class PlayGround {
 
     @FXML
     private void pressOn_4() { // 3 6 8
+        playCustomSoundFX(upgrade_player);
         int result = 0;
         if( upg_inc_common_light_4.isVisible()) result = playerAltar.buyAlchGetEssenceUpg(playerStock, player);
         String message = "             Level: " + playerAltar.getAlchGetEssenceLevel() +
@@ -519,6 +562,7 @@ public class PlayGround {
 
     @FXML
     private void pressOn_5() { // 2 6 7
+        playCustomSoundFX(upgrade_player);
         int result = 0;
         if( upg_spdp_common_light_5.isVisible()) result = playerAltar.buyAlchSpeedUpg(playerStock, player);
         String message = "             Level: " + playerAltar.getAlchSpeedLevel() +

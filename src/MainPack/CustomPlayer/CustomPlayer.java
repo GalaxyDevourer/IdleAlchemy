@@ -2,7 +2,6 @@ package MainPack.CustomPlayer;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
 
 import java.io.File;
 
@@ -40,5 +39,9 @@ public class CustomPlayer {
 
     public void stopSound () {
         mediaPlayer.stop();
+    }
+
+    public void disposeSound () {
+        mediaPlayer.dispose();
     }
 }
