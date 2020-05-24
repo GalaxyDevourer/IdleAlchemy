@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.List;
 import java.util.Properties;
 
 public class UserDAO implements FactoryDAO<User> {
@@ -40,6 +41,11 @@ public class UserDAO implements FactoryDAO<User> {
             closeCon(conn);
         }
 
+    }
+
+    @Override
+    public List<User> getAll() throws Exception {
+        return null;
     }
 
     // метод сохранения данных в БД

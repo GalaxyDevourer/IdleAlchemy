@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class PlayerDAO implements FactoryDAO<Player> {
@@ -42,6 +44,39 @@ public class PlayerDAO implements FactoryDAO<Player> {
             closeCon(conn);
         }
 
+    }
+
+    @Override
+    public List<Player> getAll() throws Exception {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        List<Player> list = new ArrayList<>();
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement("SELECT * FROM PlayerStats ORDER BY Stage");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Player player = new Player();
+
+                player.setUsername(rs.getString("Username"));
+                player.setStage(rs.getInt("Stage"));
+                player.setAlchSpeed(rs.getInt("AlchSpeed"));
+                player.setAlchProd(rs.getInt("AlchProd"));
+                player.setWeaponDamage(rs.getInt("WeaponDamage"));
+                player.setWeaponSpeed(rs.getDouble("WeaponSpeed"));
+
+                list.add(player);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeSt(stmt);
+            closeCon(conn);
+        }
+
+        return list;
     }
 
     @Override

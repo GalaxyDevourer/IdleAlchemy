@@ -33,10 +33,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-// класс контроллера интерфейса игры
-// отвечает за использование графических элементов и
-// взаимодействия между ними
-
 public class PlayGround {
     private Player player;
     private Altar playerAltar;
@@ -101,6 +97,9 @@ public class PlayGround {
     @FXML ImageView attack_ball;
     @FXML ImageView health_bar;
 
+    @FXML AnchorPane leaderboard_common;
+    @FXML AnchorPane leaderboard_press;
+
     @FXML AnchorPane soundON_press;
     @FXML AnchorPane soundON_common;
     @FXML AnchorPane soundOFF_press;
@@ -133,8 +132,10 @@ public class PlayGround {
     }
 
     private static Stage stage = new Stage();
+    private static Stage leaderboard = new Stage();
 
     static void closeStage() {
+        leaderboard.close();
         stage.close();
     }
 
@@ -159,6 +160,7 @@ public class PlayGround {
     //##############################  БЛОК ЗАКРЫТИЯ ОКНА И ВОЗВРАЩЕНИЯ В МЕНЮ ВХОДА  ##################################
 
     void closeGame () throws IOException {
+        closeStage();
         background_player.disposeSound();
         weapon_player.disposeSound();
         alch_player.disposeSound();
@@ -174,7 +176,39 @@ public class PlayGround {
         stage.setTitle("Idle Alchemy!");
         stage.show();
 
-        Image image = new Image("Materials\\Cursor\\CustomCursor.png");  //pass in the image path
+        Image image = new Image("Materials\\Cursor\\CustomCursor.png");
+        scene.setCursor(new ImageCursor(image));
+    }
+
+    //#############################################  БЛОК ЛЕВОГО МЕНЮ  #################################################
+
+    @FXML
+    private void clickLeaderboard () throws IOException {
+        if ( leaderboard_common.isVisible()) {
+            leaderboard_common.setVisible(false);
+            leaderboard_press.setVisible(true);
+        }
+        else if ( !leaderboard_common.isVisible()) {
+            leaderboard_press.setVisible(false);
+            leaderboard_common.setVisible(true);
+
+            openLeaderboard();
+        }
+    }
+
+    private void openLeaderboard() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("leaderboard.fxml"));
+        Parent root = loader.load();
+
+        LeaderBoard leaderBoard = loader.getController();
+        leaderBoard.initLists();
+
+        Scene scene = new Scene(root, 480, 600);
+        leaderboard.setScene(scene);
+        leaderboard.setTitle("Leaderboard");
+        leaderboard.show();
+
+        Image image = new Image("Materials\\Cursor\\CustomCursor.png");
         scene.setCursor(new ImageCursor(image));
     }
 
@@ -259,7 +293,6 @@ public class PlayGround {
 
     //####################################### БЛОК МЕТОДОВ АНИМАЦИИ ##################################################
 
-    // начальная инициализация при старте игры
     void initAnimation() {
         weaponAnimation();
         attackAnimation();
@@ -268,7 +301,6 @@ public class PlayGround {
         initBubblesList();
     }
 
-    // метод анимации оружия
     private void weaponAnimation() {
         weapon_skin.setImage(new Image("@../../Materials/BattleGround/Weapon_sprite.png"));
         weapon_skin.setViewport(new Rectangle2D(0, 0, 80, 155));
@@ -284,7 +316,6 @@ public class PlayGround {
         animation.play();
     }
 
-    // метод анимации алхимика
     private void alchemistAnimation() {
         alchemist.setImage(new Image("@../../Materials/Alchemist/Alchemist_full.png"));
         alchemist.setViewport(new Rectangle2D(0, 0, 104, 122));
@@ -300,7 +331,6 @@ public class PlayGround {
         animation.play();
     }
 
-    // метод анимации атаки
     private void attackAnimation() {
         attack_ball.setImage(new Image("@../../Materials/BattleGround/attack.png"));
         attack_ball.setViewport(new Rectangle2D(0, 0, 40, 36));
@@ -315,7 +345,6 @@ public class PlayGround {
         animation.setCycleCount(Animation.INDEFINITE);
         animation.play();
 
-        // вызов метода смены длительности анимации относительно скорости оружия
         changeSpeedAnimation(player.getWeaponSpeed());
     }
 
@@ -332,7 +361,7 @@ public class PlayGround {
                             playCustomSoundFX(weapon_player);
                             transition.play();
                             attack_ball.setVisible(true);
-                            // установить при окончании
+
                             transition.setOnFinished((ActionEvent e) -> {
                                 attack_ball.setVisible(false);
 
@@ -367,12 +396,10 @@ public class PlayGround {
         monster_skin.setImage(monster);
     }
 
-    // текст описания умения
     private void changeAbilityDesc(Text panel, String text) {
         panel.setText(text);
     }
 
-    // текст при улучшении умения
     private void warningUpgradeMessage(int warn, String message) {
         switch (warn) {
             case 0:
@@ -474,7 +501,6 @@ public class PlayGround {
 
     //#################################  БЛОК МЕТОДОВ ПРИ ВЫЗОВЕ КНОПОК АЛТАРЯ  ####################################
 
-    // метод анимации рун и кнопок
     private void rune_lightOff() {
         rune_1.setVisible(false); rune_2.setVisible(false); rune_3.setVisible(false);
         rune_4.setVisible(false); rune_5.setVisible(false); rune_6.setVisible(false);

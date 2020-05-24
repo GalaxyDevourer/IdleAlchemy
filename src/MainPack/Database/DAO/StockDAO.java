@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class StockDAO implements FactoryDAO<Stock>{
@@ -41,6 +43,39 @@ public class StockDAO implements FactoryDAO<Stock>{
             closeSt(stmt);
             closeCon(conn);
         }
+    }
+
+    @Override
+    public List<Stock> getAll() throws Exception {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        List<Stock> list = new ArrayList<>();
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement("SELECT * FROM Stock ORDER BY Username");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Stock stock = new Stock();
+
+                stock.setUsername(rs.getString("Username"));
+                stock.setSunEssenceAmount(rs.getInt("SunEss"));
+                stock.setStormEssenceAmount(rs.getInt("StormEss"));
+                stock.setEarthEssenceAmount(rs.getInt("EarthEss"));
+                stock.setVoidEssenceAmount(rs.getInt("VoidEss"));
+                stock.setEnergyEssenceAmount(rs.getInt("EnergyEss"));
+
+                list.add(stock);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeSt(stmt);
+            closeCon(conn);
+        }
+
+        return list;
     }
 
     @Override

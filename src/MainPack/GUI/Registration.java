@@ -10,8 +10,6 @@ import MainPack.Entity.Player;
 import MainPack.Entity.Stock;
 import MainPack.Entity.User;
 import MainPack.Main;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.ImageCursor;
 import javafx.scene.control.PasswordField;

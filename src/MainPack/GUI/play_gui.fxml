@@ -72,6 +72,24 @@
                </children>
             </AnchorPane>
             <Slider fx:id="volume_changer" blockIncrement="0.01" layoutX="963.0" layoutY="56.0" max="1.0" onMouseReleased="#changeVolumeSound" orientation="VERTICAL" prefHeight="75.0" prefWidth="0.0" value="0.5" />
+            <AnchorPane fx:id="leaderboard_common" onMousePressed="#clickLeaderboard" onMouseReleased="#clickLeaderboard" prefHeight="60.0" prefWidth="60.0">
+               <children>
+                  <ImageView layoutX="-2.0" layoutY="3.0">
+                     <image>
+                        <Image url="@../../Materials/LeftMenu/leaderboard_common.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="leaderboard_press" prefHeight="60.0" prefWidth="60.0" visible="false">
+               <children>
+                  <ImageView layoutX="-2.0" layoutY="3.0">
+                     <image>
+                        <Image url="@../../Materials/LeftMenu/leaderboard_press.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="upgrade_field" layoutX="600.0" layoutY="250.0" maxHeight="400.0" maxWidth="400.0" minHeight="400.0" minWidth="400.0" prefHeight="200.0" prefWidth="200.0">

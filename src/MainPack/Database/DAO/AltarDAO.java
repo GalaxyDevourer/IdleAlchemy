@@ -1,12 +1,15 @@
 package MainPack.Database.DAO;
 
 import MainPack.Entity.Altar;
+import MainPack.Entity.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class AltarDAO implements FactoryDAO<Altar>{
@@ -40,6 +43,39 @@ public class AltarDAO implements FactoryDAO<Altar>{
             closeSt(stmt);
             closeCon(conn);
         }
+    }
+
+    @Override
+    public List<Altar> getAll() throws Exception {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        List<Altar> list = new ArrayList<>();
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement("SELECT * FROM Altar ORDER BY Username");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Altar altar = new Altar();
+
+                altar.setUsername(rs.getString("Username"));
+                altar.setCostReduceLevel(rs.getInt("CostReduceLevel"));
+                altar.setAlchSpeedLevel(rs.getInt("AlchSpeedLevel"));
+                altar.setAlchGetEssenceLevel(rs.getInt("AlchGetEssenceLevel"));
+                altar.setWeaponSpeedLevel(rs.getInt("WeaponSpeedLevel"));
+                altar.setWeaponDamageLevel(rs.getInt("WeaponDamageLevel"));
+
+                list.add(altar);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeSt(stmt);
+            closeCon(conn);
+        }
+
+        return list;
     }
 
     @Override
